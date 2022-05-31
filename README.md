@@ -1,2 +1,2 @@
 # fvcom441
-Base version from of FVCOM from "http://code.fvcom.org/medm/fvcom441.git". Adding a general Dye/Tracer module by Cefas on ADA.uea.ac.uk
+The repo has the base version directly downloaded from "http://code.fvcom.org/medm/fvcom441.git" which is the most updated version up to date. I aim to add a general version of passive dye/tracer module which can be applied not only to point source. The complilation and run environment is ada.uea.ac.uk. The first a few applications will be Liverpool Bay and West Sri Lanka coastal ocean.
