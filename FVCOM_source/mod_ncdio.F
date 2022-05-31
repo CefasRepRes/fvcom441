@@ -568,6 +568,14 @@ CONTAINS
 !!$          NCF => ADD(NCF,VORTICITY_FILE_OBJECT() )
        END IF
        
+#      if defined (DYE_RELEASE)
+       IF(NC_DYE) THEN
+          NCF2 => DYE_FILE_OBJECT()
+          NCF => ADD(NCF,NCF2)
+!!$          NCF => ADD(NCF,DYE_FILE_OBJECT() )
+#      endif
+
+       END IF
        IF(NC_SALT_TEMP) THEN
           NCF2 => SALT_TEMP_FILE_OBJECT()
           NCF => ADD(NCF,NCF2)
@@ -847,6 +855,12 @@ CONTAINS
           NCF => ADD(NCF,NCF2)
        END IF
        
+#      if defined (DYE_RELEASE)
+       IF(NCSF_DYE) THEN
+          NCF2 => DYE_FILE_OBJECT_SRUFACE()
+          NCF => ADD(NCF,NCF2)
+#      endif
+
        IF(NCSF_SALT_TEMP) THEN
           NCF2 => SALT_TEMP_FILE_OBJECT_SURFACE()
           NCF => ADD(NCF,NCF2)
@@ -1004,6 +1018,12 @@ CONTAINS
 !!$       NC_AVG_DATA => ADD(NC_AVG_DATA,VORTICITY_FILE_OBJECT() )
     END IF
     
+#      if defined (DYE_RELEASE)
+       IF(NCAV_DYE) THEN
+          NCF_TMP => DYE_FILE_OBJECT()
+          NCF => ADD(NC_AVG_DATA,NCF_TMP)
+#      endif
+
     IF(NCAV_SALT_TEMP) THEN
        NCF_TMP => SALT_TEMP_FILE_OBJECT()
        NC_AVG_DATA => ADD(NC_AVG_DATA,NCF_TMP)
@@ -1477,7 +1497,12 @@ CONTAINS
     NC_RST2 => TURBULENCE_FILE_OBJECT()
     NC_RST => ADD(NC_RST,NC_RST2)
 !!$    NC_RST => ADD(NC_RST,TURBULENCE_FILE_OBJECT() )
-    
+
+#   if defined (DYE_RELEASE)
+    NC_RST2 => DYE_FILE_OBJECT()
+    NC_RST => ADD(NC_RST,NC_RST2)
+#   endif
+
     NC_RST2 => SALT_TEMP_FILE_OBJECT()
     NC_RST => ADD(NC_RST,NC_RST2)
 !!$    NC_RST => ADD(NC_RST,SALT_TEMP_FILE_OBJECT() )
