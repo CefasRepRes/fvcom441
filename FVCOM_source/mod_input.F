@@ -262,6 +262,7 @@ CONTAINS
     NC_FILE_DATE    = .False.   
     NC_VELOCITY     = .False.
     NC_SALT_TEMP    = .False.
+    NC_DYE          = .False.
     NC_TURBULENCE   = .False.
     NC_AVERAGE_VEL  = .False.
     NC_VERTICAL_VEL = .False.
@@ -304,6 +305,7 @@ CONTAINS
     NCSF_FILE_DATE    = .False.   
     NCSF_VELOCITY     = .False.
     NCSF_SALT_TEMP    = .False.
+    NCSF_DYE          = .False.
     NCSF_TURBULENCE   = .False.
     NCSF_WIND_VEL     = .False.
 # if defined (AIR_PRESSURE) || (HEATING_CALCULATED)

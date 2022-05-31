@@ -2376,6 +2376,11 @@ write(myid+2000,*) seof
     NCF2 => TURBULENCE_FILE_OBJECT()
     NCF => ADD(NCF,NCF2)
 !!$    NCF => ADD(NCF,TURBULENCE_FILE_OBJECT() )
+# if defined (DYE_RELEASE)
+    NCF2 => DYE_FILE_OBJECT()
+    NCF => ADD(NCF,NCF2)
+!!$    NCF => ADD(NCF,DYE_FILE_OBJECT() )
+# end
     
     NCF2 => SALT_TEMP_FILE_OBJECT()
     NCF => ADD(NCF,NCF2)

@@ -509,6 +509,10 @@
 # if !defined(SEDIMENT) && !defined(WATER_QUALITY)
          CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS)
 # endif  
+ # if defined(DYE_RELEASE)
+         CALL UPDATE_RIVERS(IntTime,QDIS,DYEE=DYEDIS)
+# endif
+
 
          QDIS    = QDIS*RAMP
          

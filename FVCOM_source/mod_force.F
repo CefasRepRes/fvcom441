@@ -93,6 +93,7 @@ MODULE MOD_FORCE
      TYPE(NCVAR), POINTER :: FLUX_N, FLUX_P
      TYPE(NCVAR), POINTER :: TEMP_N, TEMP_P
      TYPE(NCVAR), POINTER :: SALT_N, SALT_P
+     TYPE(NCVAR), POINTER :: DYE_N,  DYE_P
 # if defined (WATER_QUALITY)
      TYPE(NCVAR), POINTER :: WQM1_N, WQM1_P     
      TYPE(NCVAR), POINTER :: WQM2_N, WQM2_P     
@@ -1993,6 +1994,7 @@ CONTAINS
 # endif
     ALLOCATE(TDIS(NUMQBC));         TDIS   = 0.0_SP
     ALLOCATE(SDIS(NUMQBC));         SDIS   = 0.0_SP
+    ALLOCATE(DYEDIS(NUMQBC));       DYEDIS = 0.0_SP
     ALLOCATE(QAREA(NUMQBC));        QAREA  = 0.0_SP
     ALLOCATE(ANGLEQ(NUMQBC));       ANGLEQ = 0.0_SP
     ALLOCATE(VLCTYQ(NUMQBC));       VLCTYQ = 0.0_SP
@@ -11396,7 +11398,7 @@ CONTAINS
     IF(DBG_SET(DBG_SBR)) write(IPT,*) "END SURFACE_PRECIPITATION"
   END SUBROUTINE SURFACE_PRECIPITATION
   !==============================================================================|
-  SUBROUTINE UPDATE_RIVERS(NOW,FLUX,TEMP,SALT,WQM,SED,BIO)
+  SUBROUTINE UPDATE_RIVERS(NOW,FLUX,TEMP,SALT,DYE,WQM,SED,BIO)
 # if defined (BioGen)
     USE MOD_1D, ONLY : NTT
 # endif  
@@ -11405,6 +11407,7 @@ CONTAINS
     REAL(SP), ALLOCATABLE :: FLUX(:)
     REAL(SP), ALLOCATABLE, OPTIONAL :: TEMP(:)
     REAL(SP), ALLOCATABLE, OPTIONAL :: SALT(:)
+    REAL(SP), ALLOCATABLE, OPTIONAL :: DYE(:)
     REAL(SP), ALLOCATABLE, OPTIONAL :: WQM(:,:)
     REAL(SP), ALLOCATABLE, OPTIONAL :: SED(:,:)
     REAL(SP), ALLOCATABLE, OPTIONAL :: BIO(:,:)
@@ -11431,6 +11434,9 @@ CONTAINS
     IF(PRESENT(SALT)) THEN
        IF(.NOT. ALLOCATED(SALT)) CALL FATAL_ERROR &
             &("THE RIVER SALT VARIABLE PASSED TO UPDATE IS NOT ALLOCATED")
+    IF(PRESENT(DYE)) THEN
+       IF(.NOT. ALLOCATED(DYE)) CALL FATAL_ERROR &
+            &("THE RIVER DYE VARIABLE PASSED TO UPDATE IS NOT ALLOCATED")
     END IF
 
 # if defined (WATER_QUALITY)
@@ -11510,6 +11516,41 @@ CONTAINS
        END DO
 
        DEALLOCATE(CURRENT)
+
+       IF(PRESENT(DYE)) THEN
+
+          ! RIVER DYE
+          VAR_N => RIVER_FORCING(I)%DYE_N
+          VAR_P => RIVER_FORCING(I)%DYE_P
+          CALL UPDATE_VAR_BRACKET(NCF,VAR_P,VAR_N,RIVTIME,STATUS)
+          IF (STATUS /= 0) THEN
+             CALL FATAL_ERROR("COULD NOT UPATE RIVER_FILE TIME BRACKET: BOUNDS EXCEEDED?")
+          end if
+
+          ALLOCATE(CURRENT(NRSF))
+
+          CALL NC_POINT_VAR(VAR_N,VNP)
+          CALL NC_POINT_VAR(VAR_P,VPP)        
+
+          !====================================================
+          ! Linear interpolation between time points
+          !CURRENT = FTM%NEXT_WGHT * VNP + FTM%PREV_WGHT * VPP
+          !
+          ! OR
+          !
+          ! Nearest time sets the value
+          CURRENT = VNP
+          if (FTM%PREV_WGHT .gt. 0.5_sp) current = VPP
+          !====================================================
+
+
+          DO J =1,NRSF
+             IND = RIVER_FORCING(I)%RIV_FILE2LOC(J)
+             IF(IND /= 0) DYE(IND) = CURRENT(J)
+          END DO
+
+          DEALLOCATE(CURRENT)
+       END IF
 
        IF(PRESENT(SALT)) THEN
 

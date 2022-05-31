@@ -626,6 +626,38 @@ MODULE MOD_DYE
 !   Using smolarkiewicz, P. K; A fully multidimensional positive definite advection
 !   transport algorithm with small implicit diffusion, Journal of Computational
 !   Physics, 54, 325-362, 1984
+
+
+
+
+  IF(RIVER_TS_SETTING == 'calculated') THEN
+     IF(RIVER_INFLOW_LOCATION == 'node') THEN
+        IF(NUMQBC > 0) THEN
+           DO J=1,NUMQBC
+              JJ=INODEQ(J)
+              STPOINT=DYEDIS(J)
+              DO K=1,KBM1
+                 XFLUX(JJ,K)=XFLUX(JJ,K) - QDIS(J)*VQDIST(J,K)*STPOINT
+              END DO
+           END DO
+        END IF
+     ELSE IF(RIVER_INFLOW_LOCATION == 'edge') THEN
+        IF(NUMQBC > 0) THEN
+           DO J=1,NUMQBC
+              J1=N_ICELLQ(J,1)
+              J2=N_ICELLQ(J,2)
+              STPOINT=DYEDIS(J)
+              DO K=1,KBM1
+                 XFLUX(J1,K)=XFLUX(J1,K)-  &
+                      QDIS(J)*RDISQ(J,1)*VQDIST(J,K)*STPOINT    !/DZ1(J1,K)
+                 XFLUX(J2,K)=XFLUX(J2,K)-  &
+                      QDIS(J)*RDISQ(J,2)*VQDIST(J,K)*STPOINT    !/DZ1(J2,K)
+              END DO
+           END DO
+        END IF
+     END IF
+  END IF
+
         
 ! The horizontal term of advection is neglected here
 
@@ -905,34 +937,34 @@ MODULE MOD_DYE
 !
 !--Set Boundary Conditions-For Fresh Water Flux--------------------------------!
 !
-!   IF(POINT_ST_TYPE == 'calculated') THEN
-!     IF(INFLOW_TYPE == 'node') THEN
-!       IF(NUMQBC > 0) THEN
-!         DO J=1,NUMQBC
-!           JJ=INODEQ(J)
-!           STPOINT=SDIS(J)
-!           DO K=1,KBM1
-!!             XFLUX(JJ,K)=XFLUX(JJ,K) - QDIS(J)*VQDIST(J,K)*STPOINT/DZ(K)
-!             XFLUX(JJ,K)=XFLUX(JJ,K) - QDIS(J)*VQDIST(J,K)*STPOINT
-!           END DO
-!         END DO
-!       END IF
-!     ELSE IF(INFLOW_TYPE == 'edge') THEN
-!       IF(NUMQBC > 1) THEN
-!         DO J=1,NUMQBC
-!           J1=N_ICELLQ(J,1)
-!           J2=N_ICELLQ(J,2)
-!           STPOINT=SDIS(J) !!ASK LIU SHOULD THIS BE STPOINT1(J1)/STPOINT2(J2)
-!           DO K=1,KBM1
-!!             XFLUX(J1,K)=XFLUX(J1,K)-QDIS(J)*RDISQ(J,1)*VQDIST(J,K)*STPOINT/DZ(K)
-!!             XFLUX(J2,K)=XFLUX(J2,K)-QDIS(J)*RDISQ(J,2)*VQDIST(J,K)*STPOINT/DZ(K)
-!             XFLUX(J1,K)=XFLUX(J1,K)-QDIS(J)*RDISQ(J,1)*VQDIST(J,K)*STPOINT
-!             XFLUX(J2,K)=XFLUX(J2,K)-QDIS(J)*RDISQ(J,2)*VQDIST(J,K)*STPOINT
-!           END DO
-!         END DO
-!       END IF
-!     END IF
-!   END IF
+
+  IF(RIVER_TS_SETTING == 'calculated') THEN
+     IF(RIVER_INFLOW_LOCATION == 'node') THEN
+        IF(NUMQBC > 0) THEN
+           DO J=1,NUMQBC
+              JJ=INODEQ(J)
+              STPOINT=DYEDIS(J)
+              DO K=1,KBM1
+                 XFLUX(JJ,K)=XFLUX(JJ,K) - QDIS(J)*VQDIST(J,K)*STPOINT
+              END DO
+           END DO
+        END IF
+     ELSE IF(RIVER_INFLOW_LOCATION == 'edge') THEN
+        IF(NUMQBC > 0) THEN
+           DO J=1,NUMQBC
+              J1=N_ICELLQ(J,1)
+              J2=N_ICELLQ(J,2)
+              STPOINT=DYEDIS(J)
+              DO K=1,KBM1
+                 XFLUX(J1,K)=XFLUX(J1,K)-  &
+                      QDIS(J)*RDISQ(J,1)*VQDIST(J,K)*STPOINT    !/DZ1(J1,K)
+                 XFLUX(J2,K)=XFLUX(J2,K)-  &
+                      QDIS(J)*RDISQ(J,2)*VQDIST(J,K)*STPOINT    !/DZ1(J2,K)
+              END DO
+           END DO
+        END IF
+     END IF
+  END IF
 
 #  endif
 ! NOT MPDATA
@@ -1700,12 +1732,36 @@ MODULE MOD_DYE
 !------------------------------------------------------------------------------|
    USE ALL_VARS
    USE BCS
+   USE MOD_UTILS
    USE MOD_OBCS
+   USE MOD_FORCE
    IMPLICIT NONE
    REAL(SP) :: S2D,S2D_NEXT,S2D_OBC,T2D,T2D_NEXT,T2D_OBC,XFLUX2D,TMP
    INTEGER  :: I,J,K,J1,J11,J22
    REAL(SP) :: SMAX,SMIN
 !------------------------------------------------------------------------------|
+
+  IF(RIVER_TS_SETTING == 'specified') THEN
+     IF(NUMQBC > 0) THEN
+        IF(RIVER_INFLOW_LOCATION == 'node') THEN
+           DO I=1,NUMQBC
+              J11=INODEQ(I)
+              DO K=1,KBM1
+                 DYEF(J11,K)=DYEQIS(I)
+              END DO
+           END DO
+        ELSE IF(RIVER_INFLOW_LOCATION == 'edge') THEN
+           DO I=1,NUMQBC
+              J11=N_ICELLQ(I,1)
+              J22=N_ICELLQ(I,2)
+              DO K=1,KBM1
+                 DYEF(J11,K)=DYEQIS(I)
+                 DYEF(J22,K)=DYEQIS(I)
+              END DO
+           END DO
+        END IF
+     END IF
+  END IF
 
 
        

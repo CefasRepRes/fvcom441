@@ -19,6 +19,9 @@ MODULE MOD_STATION_TIMESERIES
   LOGICAL OUT_ATM_PRESSURE
 # endif  
   LOGICAL OUT_SALT_TEMP
+# if defined (DYE_RELEASE)
+  LOGICAL OUT_DYE
+# endif  
 # if defined (WAVE_CURRENT_INTERACTION) && !defined (WAVE_OFFLINE)
   LOGICAL OUT_SIG_WAVE_HEIGHT
   LOGICAL OUT_REL_PEAK_PERIOD
@@ -42,6 +45,9 @@ MODULE MOD_STATION_TIMESERIES
        & OUT_ATM_PRESSURE,                 &
 # endif  
        & OUT_SALT_TEMP,                    &
+# if defined (DYE_RELEASE)
+       & OUT_DYE,                    &
+# endif  
 # if defined (WAVE_CURRENT_INTERACTION) && !defined (WAVE_OFFLINE)
        & OUT_SIG_WAVE_HEIGHT,              &
        & OUT_REL_PEAK_PERIOD,              &
@@ -85,6 +91,9 @@ MODULE MOD_STATION_TIMESERIES
    integer,private :: u_s_vid
    integer,private :: v_s_vid
    integer,private :: ww_s_vid
+# if defined (DYE_RELEASE)
+   integer,private :: dye_s_vid
+# endif  
    integer,private :: s1_s_vid
    integer,private :: t1_s_vid
    integer,private :: el_s_vid
@@ -399,6 +408,14 @@ MODULE MOD_STATION_TIMESERIES
        call putvar(i1,i2,m,mgl,1,1,"n",el,nc_ofid,el_s_vid,myid,nprocs&
             &,ipt, stck_cnt) 
      END IF
+
+# if defined (DYE_RELEASE)
+     IF(OUT_DYE)THEN 
+       i1 = lbound(dye,1) ; i2 = ubound(dye,1)
+       call putvar(i1,i2,m,mgl,kb,kb-1,"n",dye,nc_ofid,dye_s_vid,myid&
+            &,nprocs,ipt, stck_cnt) 
+     END IF
+# endif  
 
      IF(OUT_SALT_TEMP)THEN 
        i1 = lbound(t1,1) ; i2 = ubound(t1,1)
@@ -798,6 +815,15 @@ NETCDF_TIMESTRING = 'seconds after 00:00:00'
 #    endif
     end if
 
+#  if defined (DYE_RELEASE)
+    if(OUT_DYE)then
+     ierr = nf90_def_var(nc_ofid,"dye",nf90_float,dynm2dn_lay,dye_s_vid)
+     ierr = nf90_put_att(nc_ofid,dye_s_vid,"long_name","temperature")
+     ierr = nf90_put_att(nc_ofid,dye_s_vid,"standard_name","dye")
+     ierr = nf90_put_att(nc_ofid,dye_s_vid,"units"," ")
+     ierr = nf90_put_att(nc_ofid,dye_s_vid,"type","data")
+     ierr = nf90_put_att(nc_ofid,dye_s_vid,"coordinates","time siglay station")
+#    endif
     if(OUT_SALT_TEMP)then
      ierr = nf90_def_var(nc_ofid,"temp",nf90_float,dynm2dn_lay,t1_s_vid)
      ierr = nf90_put_att(nc_ofid,t1_s_vid,"long_name","temperature")
@@ -816,6 +842,9 @@ NETCDF_TIMESTRING = 'seconds after 00:00:00'
 #    if defined (USE_NETCDF4) && (USE_COMPRESSION)
      ierr = nf90_def_var_deflate(nc_ofid, t1_s_vid, shuffle=1, deflate=1, deflate_level=9)
      ierr = nf90_def_var_deflate(nc_ofid, s1_s_vid, shuffle=1, deflate=1, deflate_level=9)
+#    if defined (DYE_RELEASE)
+     ierr = nf90_def_var_deflate(nc_ofid, dye_s_vid, shuffle=1, deflate=1, deflate_level=9)
+#    endif
 #    endif
     end if
 
