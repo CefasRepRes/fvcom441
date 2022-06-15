@@ -221,6 +221,7 @@ CONTAINS
          V_SURFACE(:)   = V(:,1)
          T1_SURFACE(:)  = T1(:,1)
          S1_SURFACE(:)  = S1(:,1)
+         DYE1_SURFACE(:)  = DYE1(:,1)
          VISCOFM_SURFACE(:) = VISCOFM(:,1)
          VISCOFH_SURFACE(:) = VISCOFH(:,1)
        
@@ -9863,6 +9864,10 @@ END SUBROUTINE LOAD_SUBDOMAIN_FILE
        IF (STATUS /=0 ) CALL FATAL_ERROR("COULD NOT ALLOCATE MEMORY ON IO PROC FOR OUTPUT DATA:S1_SURFACE")
        S1_SURFACE = 0.0_SP
 
+       allocate(DYE1_SURFACE(MGL),stat=status)
+       IF (STATUS /=0 ) CALL FATAL_ERROR("COULD NOT ALLOCATE MEMORY ON IO PROC FOR OUTPUT DATA:DYE1_SURFACE")
+       DYE1_SURFACE = 0.0_SP
+
     END IF
 
 
@@ -9969,6 +9974,59 @@ END SUBROUTINE LOAD_SUBDOMAIN_FILE
 
 
     IF(DBG_SET(DBG_SBR)) WRITE(IPT,*) "END SALT_TEMP_FILE_OBJECT_SURFACE"
+
+# if defined(DYE_RELEASE)
+    ! DYE_SURFACE
+    IF(DYEON) THEN
+    VAR  => NC_MAKE_AVAR(name='tracer_surface',&
+         & values=DYE1_SURFACE, DIM1= DIM_node, DIM2 = DIM_time)
+
+    ATT  => NC_MAKE_ATT(name='long_name',values='surface tracer') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='standard_name',values='seasurface_water_tracer') 
+    VAR  => ADD(VAR,ATT)
+
+# if defined(UCF)
+    ATT  => NC_MAKE_ATT(name='units',values='1e-3') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='grid',values='grid4') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='coordinates',values='lon lat') 
+    VAR  => ADD(VAR,ATT)
+    
+    ATT  => NC_MAKE_ATT(name='grid_location',values='node') 
+    VAR  => ADD(VAR,ATT)    
+
+# else
+
+    ATT  => NC_MAKE_ATT(name='units',values='1e-3') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='grid',values='fvcom_grid') 
+    VAR  => ADD(VAR,ATT)
+
+!!$    ATT  => NC_MAKE_ATT(name='coordinates',values=CoordVar) 
+    ATT  => NC_MAKE_ATT(name='coordinates',values='time lat lon') 
+    VAR  => ADD(VAR,ATT)    
+
+    ATT  => NC_MAKE_ATT(name='type',values='data') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='mesh',values='fvcom_mesh') 
+    VAR  => ADD(VAR,ATT)
+
+    ATT  => NC_MAKE_ATT(name='location',values='node') 
+    VAR  => ADD(VAR,ATT)
+# endif
+
+    NCF  => ADD(NCF,VAR)
+
+    IF(DBG_SET(DBG_SBR)) WRITE(IPT,*) "END DYE_FILE_OBJECT_SURFACE"
+    END IF
+# endif
 
   END FUNCTION SALT_TEMP_FILE_OBJECT_SURFACE
 !=============================================================  
