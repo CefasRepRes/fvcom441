@@ -292,6 +292,7 @@ MODULE CONTROL
          & NC_FILE_DATE,     &
          & NC_VELOCITY,      &
          & NC_SALT_TEMP,     &
+         & NC_DYE,           &
          & NC_TURBULENCE,    &
          & NC_AVERAGE_VEL,   &
          & NC_VERTICAL_VEL,  &
@@ -341,6 +342,7 @@ MODULE CONTROL
     ! MODEL DATA
     LOGICAL NCSF_VELOCITY
     LOGICAL NCSF_SALT_TEMP
+    LOGICAL NCSF_DYE
     LOGICAL NCSF_TURBULENCE
     LOGICAL NCSF_ICE
     LOGICAL NCSF_WAVE_PARA     
@@ -367,6 +369,7 @@ MODULE CONTROL
          & NCSF_FILE_DATE,     &
          & NCSF_VELOCITY,      &
          & NCSF_SALT_TEMP,     &
+         & NCSF_DYE,           &
          & NCSF_TURBULENCE,    &
          & NCSF_WIND_VEL,      &
          & NCSF_WIND_STRESS,   &
@@ -983,6 +986,8 @@ MODULE CONTROL
     REAL(SP) :: TEMP_MIN
     REAL(SP) :: SALT_MAX
     REAL(SP) :: SALT_MIN
+    REAL(SP) :: DYE_MAX
+    REAL(SP) :: DYE_MIN
 #   if defined (WAVE_CURRENT_INTERACTION)
     REAL(SP) :: HS_MAX = 1e9
 #   endif

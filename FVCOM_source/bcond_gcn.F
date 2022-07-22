@@ -633,32 +633,48 @@
 !
 
       IF(NUMQBC_GL .GT. 0) THEN
-# if defined (WATER_QUALITY) && !defined(SEDIMENT)
-         CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,WQM=WQMDIS)
-# endif
-# if defined (WATER_QUALITY) && defined(SEDIMENT)
-         CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,WQM=WQMDIS,SED=SEDDIS)
-# endif
-# if defined(SEDIMENT) && !defined(WATER_QUALITY)
-         CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,SED=SEDDIS)
-# endif
-# if defined(BioGen)
-         IF(BIOLOGICAL_MODEL)CALL UPDATE_RIVERS(IntTime,QDIS,BIO=BIODIS)
-# endif
-# if !defined(SEDIMENT) && !defined(WATER_QUALITY) 
-         CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS)
-# endif	 
-# if defined(DYE_RELEASE)
-         CALL UPDATE_RIVERS(IntTime,QDIS,DYEE=DYEDIS)
-# endif	 
-                  
-         QDIS    = QDIS*RAMP
-         
-!#  if defined (WATER_QUALITY)
-!         DO N1 = 1, NB
-!            ! NOT YET OPERATIONAL!!!
-!            WDIS(:,N1) = UFACT*DWDIS(:,N1,L1) + FACT*DWDIS(:,N1,L2)
-!         END DO
+
+# if !defined(DYE_RELEASE)
+#   if defined (WATER_QUALITY) && !defined(SEDIMENT)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,WQM=WQMDIS)
+#   endif
+#   if defined (WATER_QUALITY) && defined(SEDIMENT)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,WQM=WQMDIS,SED=SEDDIS)
+#   endif
+#   if defined(SEDIMENT) && !defined(WATER_QUALITY)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,SED=SEDDIS)
+#   endif
+#   if defined(BioGen)
+           IF(BIOLOGICAL_MODEL)CALL UPDATE_RIVERS(IntTime,QDIS,BIO=BIODIS)
+#   endif
+#   if !defined(SEDIMENT) && !defined(WATER_QUALITY) 
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS)
+#   endif	 
+# else
+#   if defined (WATER_QUALITY) && !defined(SEDIMENT)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,DYE=DYEDIS,WQM=WQMDIS)
+#   endif
+#   if defined (WATER_QUALITY) && defined(SEDIMENT)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,DYE=DYEDIS,WQM=WQMDIS,SED=SEDDIS)
+#   endif
+#   if defined(SEDIMENT) && !defined(WATER_QUALITY)
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,DYE=DYEDIS,SED=SEDDIS)
+#   endif
+#   if defined(BioGen)
+           IF(BIOLOGICAL_MODEL)CALL UPDATE_RIVERS(IntTime,QDIS,BIO=BIODIS)
+#   endif
+#   if !defined(SEDIMENT) && !defined(WATER_QUALITY) 
+           CALL UPDATE_RIVERS(IntTime,QDIS,TEMP=TDIS,SALT=SDIS,DYE=DYEDIS) 
+#   endif	                                                 
+# endif	                                                         
+                                                                 
+         QDIS    = QDIS*RAMP                                     
+                                                                 
+!#  if defined (WATER_QUALITY)                                   
+!         DO N1 = 1, NB                                          
+!            ! NOT YET OPERATIONAL!!!                            
+!            WDIS(:,N1) = UFACT*DWDIS(:,N1,L1) + FACT*DWDIS(:,N1 ,L2)
+!         END DO                                                 
 !#  endif
          
       END IF

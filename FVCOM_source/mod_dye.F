@@ -1550,32 +1550,33 @@ MODULE MOD_DYE
 !   
 !---- specify the source term------------------------------------------|
 !
-   IF(INTTIME.GE.DYESTART.AND.INTTIME.LE.DYESTOP) THEN
-
-!    IF(SERIAL)THEN
+! turn off the source form of dye here.  H. Liu, 2022
+!   IF(INTTIME.GE.DYESTART.AND.INTTIME.LE.DYESTOP) THEN
+!
+!!    IF(SERIAL)THEN
+!!     DO KK=1, KSPE_DYE
+!!       K=K_SPECIFY(KK)
+!!       DO J=1,MSPE_DYE
+!!         I = M_SPECIFY(J)
+!!         F(I,K)= DYE_SOURCE_TERM
+!!       END DO
+!!     END DO
+!!    END IF 
+!
+!!# if defined (MULTIPROCESSOR)
+!!    IF(PAR)THEN
+!
 !     DO KK=1, KSPE_DYE
-!       K=K_SPECIFY(KK)
-!       DO J=1,MSPE_DYE
-!         I = M_SPECIFY(J)
-!         F(I,K)= DYE_SOURCE_TERM
-!       END DO
-!     END DO
-!    END IF 
-
-!# if defined (MULTIPROCESSOR)
-!    IF(PAR)THEN
-
-     DO KK=1, KSPE_DYE
-        K=K_SPECIFY(KK)
-        DO J=1,MSPE_DYE
-           I = NLID(M_SPECIFY(J))
-           F(I,K)= DYE_SOURCE_TERM
-        ENDDO
-     ENDDO
-!    END IF 
-!#  endif
-   ENDIF
-
+!        K=K_SPECIFY(KK)
+!        DO J=1,MSPE_DYE
+!           I = NLID(M_SPECIFY(J))
+!           F(I,K)= DYE_SOURCE_TERM
+!        ENDDO
+!     ENDDO
+!!    END IF 
+!!#  endif
+!   ENDIF
+!
    IF(DBG_SET(DBG_SBR)) WRITE(IPT,*)"End: vdif_dye"
    RETURN
    END SUBROUTINE VDIF_DYE
